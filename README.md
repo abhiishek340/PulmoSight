@@ -1,247 +1,86 @@
-# 🫁 PneumoScanAI – Deep Learning for Pneumonia Detection from NIH Chest X-rays
+<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-Completed-success)
+# PulmoSight
 
-**PneumoScanAI** is a deep learning-based web application designed to detect **pneumonia from chest X-ray images** using the large-scale **NIH ChestX-ray14** dataset. The solution applies transfer learning on the VGG16 architecture, fine-tuned to distinguish pneumonia cases with high confidence. It includes a real-time prediction API using Flask.
+A web app that classifies chest X-rays as pneumonia or normal using a VGG16 transfer-learning model.
 
-## 🖼️ Demo Images
+<img src="https://img.shields.io/badge/Status-Showcase%20%28code%20not%20published%29-lightgrey?style=flat-square" alt="Status: showcase"/>
 
-### Web Application Interface
-![Model Architecture](pic1.png)
+</div>
 
-### Training Performance
-![Training Results](pic2.png)
+> **Status:** showcase repository. It contains only this README and screenshots of the app. The source code, training scripts and model weights are not published here.
 
+## Overview
 
-![Web Interface](pic3.png)
+PulmoSight (shown in the UI as "Pneumonia Detection AI") lets a user upload a chest X-ray and get a binary prediction (Pneumonia or Normal) with a confidence score and a risk level. The model uses transfer learning on a VGG16 network pretrained on ImageNet. It was trained on pneumonia and normal images from the NIH ChestX-ray14 dataset, and a Flask web app serves it.
 
-### Prediction Results
-![Prediction Example](pic4.png)
+## Features
 
----
+As shown in the screenshots below:
 
-## 📚 Dataset: NIH ChestX-ray14
+- **Image upload**: drag and drop, or browse for a PNG, JPG or JPEG chest X-ray.
+- **Prediction**: a diagnosis label (Pneumonia or Normal) shown next to the uploaded image.
+- **Confidence and risk**: a confidence bar with a percentage and a risk-level badge.
+- **Model status**: a "Model Trained" indicator in the navigation bar.
+- **Built-in disclaimer**: every result reminds the user that the output is for education only.
 
-- **Source**: [NIH Chest X-rays](https://www.kaggle.com/datasets/nih-chest-xrays/data)
-- **Total Images**: 112,120
-- **Patients**: Over 30,000 unique individuals
-- **Labels**: 14 disease labels including:
-  - Pneumonia
-  - Infiltration
-  - Effusion
-  - Mass
-  - Atelectasis
-- **Format**: JPEG, labeled via a CSV metadata file (`Data_Entry_2017.csv`)
-- **Size**: ~40 GB
+## Tech stack
 
-> **Note**: Preprocessing included label filtering (Pneumonia vs. Normal), class balancing, and resizing to 224x224 pixels.
+The stack below is as described by the author. It cannot be verified from this repository.
 
----
+| Layer | Technology |
+| --- | --- |
+| Model | TensorFlow / Keras, VGG16 (ImageNet weights) |
+| Web app | Flask, HTML/CSS |
+| Data | NIH ChestX-ray14 (Pneumonia vs. Normal subset) |
 
-## 🧠 Model Architecture
+## Model design
 
-```text
-Input Image (224x224x3)
-      ↓
-Pretrained VGG16 (imagenet weights, frozen base)
-      ↓
-GlobalAveragePooling2D
-      ↓
-Dense(128, ReLU) + Dropout(0.5)
-      ↓
-Dense(1, Sigmoid)
-      ↓
-Output → Pneumonia / Normal
+```mermaid
+flowchart TD
+    A["Chest X-ray (224 x 224 x 3)"] --> B["VGG16 base, ImageNet weights, frozen"]
+    B --> C[GlobalAveragePooling2D]
+    C --> D["Dense 128, ReLU + Dropout 0.5"]
+    D --> E["Dense 1, Sigmoid"]
+    E --> F{"Pneumonia / Normal"}
 ```
 
-### Key Features:
-- **Transfer Learning**: Leverages VGG16 pretrained weights
-- **Fine-tuning**: Custom classification head for medical imaging
-- **Regularization**: Dropout layers to prevent overfitting
-- **Binary Classification**: Pneumonia vs Normal detection
+Preprocessing, as described by the author: filter the labels to Pneumonia vs. Normal, balance the classes, and resize the images to 224 x 224.
+
+## Dataset
+
+- **Source**: [NIH Chest X-rays on Kaggle](https://www.kaggle.com/datasets/nih-chest-xrays/data) (NIH Clinical Center)
+- **Contents**: 112,120 frontal chest X-rays from over 30,000 patients, with 14 disease labels in `Data_Entry_2017.csv`
+- **Size**: about 40 GB
+
+## Screenshots
+
+**Landing page**
+
+![Landing page](pic1.png)
+
+**How it works**
+
+![How it works section](pic2.png)
+
+**Upload**
+
+![Upload form](pic3.png)
+
+**Prediction result**
+
+![Prediction result](pic4.png)
+
+## Medical disclaimer
+
+This project is for education and research only. It is not a medical device and must not be used for clinical diagnosis or treatment decisions. Always consult a qualified healthcare professional.
+
+## Acknowledgments
+
+- NIH Clinical Center for the ChestX-ray14 dataset
+- The Visual Geometry Group (Oxford) for the VGG16 architecture
+- The TensorFlow/Keras and Flask communities
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-```bash
-Python 3.8+
-TensorFlow 2.x
-Flask
-NumPy
-OpenCV
-Pillow
-```
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/PneumoScanAI.git
-cd PneumoScanAI
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Download the NIH dataset (optional - for training)
-# Note: Large dataset ~40GB
-```
-
-### Running the Application
-```bash
-# Start the Flask web server
-python app.py
-
-# Open browser and navigate to
-http://localhost:5000
-```
-
----
-
-## 📁 Project Structure
-
-```
-PneumoScanAI/
-├── app.py                 # Flask web application
-├── model/
-│   ├── train_model.py     # Model training script
-│   ├── pneumonia_model.h5 # Trained model weights
-│   └── model_utils.py     # Helper functions
-├── static/
-│   ├── css/
-│   ├── js/
-│   └── uploads/           # Temporary image storage
-├── templates/
-│   ├── index.html         # Main interface
-│   └── results.html       # Prediction results
-├── data_preprocessing/
-│   ├── preprocess.py      # Data cleaning and preparation
-│   └── data_loader.py     # Dataset loading utilities
-├── requirements.txt       # Python dependencies
-
-```
-
----
-
-## 🎯 Model Performance
-
-| Metric | Score |
-|--------|-------|
-| **Accuracy** | 94.2% |
-| **Precision** | 93.8% |
-| **Recall** | 94.6% |
-| **F1-Score** | 94.2% |
-| **AUC-ROC** | 0.967 |
-
-### Confusion Matrix
-- **True Positives**: 1,847
-- **True Negatives**: 1,823
-- **False Positives**: 124
-- **False Negatives**: 106
-
----
-
-## 🔧 API Usage
-
-### Upload and Predict
-```python
-import requests
-
-# Upload image for prediction
-url = "http://localhost:5000/predict"
-files = {'file': open('chest_xray.jpg', 'rb')}
-response = requests.post(url, files=files)
-
-print(response.json())
-# Output: {"prediction": "Pneumonia", "confidence": 0.92}
-```
-
-### Direct Model Inference
-```python
-from tensorflow.keras.models import load_model
-import cv2
-import numpy as np
-
-# Load trained model
-model = load_model('model/pneumonia_model.h5')
-
-# Preprocess image
-img = cv2.imread('chest_xray.jpg')
-img = cv2.resize(img, (224, 224))
-img = np.expand_dims(img, axis=0) / 255.0
-
-# Make prediction
-prediction = model.predict(img)[0][0]
-result = "Pneumonia" if prediction > 0.5 else "Normal"
-confidence = prediction if prediction > 0.5 else 1 - prediction
-
-print(f"Prediction: {result} (Confidence: {confidence:.2f})")
-```
-
----
-
-## 📊 Data Preprocessing Pipeline
-
-1. **Label Extraction**: Parse CSV metadata for pneumonia cases
-2. **Class Balancing**: Handle imbalanced dataset using oversampling
-3. **Image Preprocessing**:
-   - Resize to 224x224 pixels
-   - Normalize pixel values (0-1)
-   - Apply data augmentation (rotation, zoom, flip)
-4. **Train/Validation Split**: 80/20 stratified split
-
----
-
-## 🏥 Medical Disclaimer
-
-> **Important**: This tool is for educational and research purposes only. It is not intended for clinical diagnosis or treatment decisions. Always consult qualified healthcare professionals for medical advice.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/improvement`)
-5. Create a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **NIH Clinical Center** for providing the ChestX-ray14 dataset
-- **VGG Team** for the pretrained architecture
-- **TensorFlow/Keras** community for deep learning framework
-- **Flask** for web application framework
-
----
-
-
-
-## 🔍 Citation
-
-If you use this work in your research, please cite:
-
-```bibtex
-@misc{pneumoscanai2024,
-  title={PneumoScanAI: Deep Learning for Pneumonia Detection from NIH Chest X-rays},
-  author={Your Name},
-  year={2024},
-  publisher={GitHub},
-  url={https://github.com/yourusername/PneumoScanAI}
-}
-```
-
----
-
-**⭐ Star this repository if you found it helpful!**
+Built by [Abhishek Yadav](https://github.com/abhiishek340)
